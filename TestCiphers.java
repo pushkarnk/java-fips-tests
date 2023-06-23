@@ -11,7 +11,8 @@ import static org.testng.Assert.assertThrows;
 
 /*
   @test
-  @library /jars/bc-fips-1.0.2.3.jar /jars/testng-7.3.0.jar
+  @library /jars/bc-fips-1.0.2.3.jar
+  @library /jtreg/lib/testng-7.3.0.jar
   @run main/othervm TestCiphers
   @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestCiphers true
  */
