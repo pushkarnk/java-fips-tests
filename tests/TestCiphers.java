@@ -120,6 +120,7 @@ public class TestCiphers {
                 failureCount++;
             }
         }
+
         if (approvedOnly) {
             assertEquals(failureCount, nonApprovedCiphers.length, "Usage of a non-approved algorithm was permitted");
         } else {
@@ -153,6 +154,5 @@ public class TestCiphers {
         } else {
             assertEquals(failureCount, 0, "Unexpected NoSuchAlgorithmException ");
         }
- 
     }
 }
