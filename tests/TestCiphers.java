@@ -140,9 +140,7 @@ public class TestCiphers {
                 Cipher.getInstance(cipher + "/NoPadding", "BCFIPS");
                 if (cipher.endsWith("ECB")) {
                     for (String padding : paddings) {
-                        System.out.println(cipher + "/" + padding);
                         Cipher.getInstance(cipher + "/" + padding, "BCFIPS");
-                        System.out.println("Pass");
                     }
                 }
             } catch (NoSuchAlgorithmException nae) {
