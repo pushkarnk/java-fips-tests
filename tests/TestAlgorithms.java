@@ -4,6 +4,7 @@ import java.security.NoSuchProviderException;
 import java.security.KeyStoreException;
 import java.security.GeneralSecurityException;
 import java.security.Security;
+import java.security.Provider;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
@@ -11,15 +12,17 @@ import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 abstract public class TestAlgorithms {
 
     private String type;
+    private String providerName;
     private boolean approvedOnly;
 
     public TestAlgorithms(String type) {
         this.type = type;
-        Security.addProvider(new BouncyCastleFipsProvider());
     }
 
     public void runTest(String [] args) throws NoSuchProviderException {
-        boolean approvedOnly = args.length == 1 && Boolean.parseBoolean(args[0]);
+        this.providerName = args[0];
+        Security.addProvider(getProvider(this.providerName));
+        boolean approvedOnly = args.length == 2 && Boolean.parseBoolean(args[1]);
         if (approvedOnly) {
             assertAllPass(getApprovedAlgorithms());
             assertAllFail(getGeneralAlgorithms());
@@ -29,11 +32,11 @@ abstract public class TestAlgorithms {
         }
     }
 
-    public void assertAllPass(String [] algorithms) throws NoSuchProviderException {
+    private void assertAllPass(String [] algorithms) throws NoSuchProviderException {
         HashSet<String> unexpectedFailures = new HashSet<>();
         for (String algo : algorithms) {
             try {
-                testFunction(algo);
+                testFunction(algo, this.providerName);
             } catch (NoSuchAlgorithmException nsae) {
                 unexpectedFailures.add(algo);
             }
@@ -42,11 +45,11 @@ abstract public class TestAlgorithms {
                         "Creation of " + type + " unexpectedly failed for " + unexpectedFailures + ": "); 
     }
 
-    public void assertAllFail(String [] algorithms) throws NoSuchProviderException {
+    private void assertAllFail(String [] algorithms) throws NoSuchProviderException {
         HashSet<String> unexpectedSuccesses = new HashSet<>();
         for (String algo : algorithms) {
             try {
-                testFunction(algo);
+                testFunction(algo, this.providerName);
                 unexpectedSuccesses.add(algo);
             } catch (NoSuchAlgorithmException nsae) {
             }
@@ -55,7 +58,15 @@ abstract public class TestAlgorithms {
                         "Creation of " + type + " unexpectedly passed for " + unexpectedSuccesses + ": ");
     }
 
-    abstract void testFunction(String algorithm) throws NoSuchProviderException, NoSuchAlgorithmException;
+    private Provider getProvider(String providerName) {
+        if (providerName.equals("BCFIPS")) {
+            return new BouncyCastleFipsProvider();
+        }
+        // TODO: handle this better?
+        return null;
+    }
+
+    abstract void testFunction(String algorithm, String provider) throws NoSuchProviderException, NoSuchAlgorithmException;
     abstract String[] getApprovedAlgorithms();
     abstract String[] getGeneralAlgorithms();
 }

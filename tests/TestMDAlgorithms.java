@@ -5,8 +5,8 @@ import javax.crypto.*;
   @test
   @library /jars/bc-fips-1.0.2.3.jar
   @library /jtreg/lib/testng-7.3.0.jar
-  @run main/othervm -Dorg.bouncycastle.jca.enable_jks=true TestMDAlgorithms false
-  @run main/othervm -Dorg.bouncycastle.jca.enable_jks=true -Dorg.bouncycastle.fips.approved_only=true TestMDAlgorithms true
+  @run main/othervm TestMDAlgorithms BCFIPS false
+  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestMDAlgorithms BCFIPS true
 */
 
 public class TestMDAlgorithms extends TestAlgorithms {
@@ -56,7 +56,7 @@ public class TestMDAlgorithms extends TestAlgorithms {
         new TestMDAlgorithms().runTest(args);
     }
 
-    void testFunction(String algo) throws NoSuchAlgorithmException, NoSuchProviderException {
-        MessageDigest.getInstance(algo, "BCFIPS");
+    void testFunction(String algo, String provider) throws NoSuchAlgorithmException, NoSuchProviderException {
+        MessageDigest.getInstance(algo, provider);
     }
 }

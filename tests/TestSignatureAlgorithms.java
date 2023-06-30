@@ -10,8 +10,8 @@ import static org.testng.Assert.assertEquals;
   @test
   @library /jars/bc-fips-1.0.2.3.jar
   @library /jtreg/lib/testng-7.3.0.jar
-  @run main/othervm TestSignatureAlgorithms false
-  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestSignatureAlgorithms true
+  @run main/othervm TestSignatureAlgorithms BCFIPS false
+  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestSignatureAlgorithms BCFIPS true
 */
 
 public class TestSignatureAlgorithms extends TestAlgorithms {
@@ -146,8 +146,8 @@ public class TestSignatureAlgorithms extends TestAlgorithms {
         };
     }
 
-    void testFunction(String algo) throws NoSuchProviderException, NoSuchAlgorithmException {
-        Signature.getInstance(algo, "BCFIPS");
+    void testFunction(String algo, String provider) throws NoSuchProviderException, NoSuchAlgorithmException {
+        Signature.getInstance(algo, provider);
     }
 
     public static void main(String [] args) throws Exception {

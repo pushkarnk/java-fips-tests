@@ -6,8 +6,8 @@ import java.security.NoSuchProviderException;
   @test
   @library /jars/bc-fips-1.0.2.3.jar
   @library /jtreg/lib/testng-7.3.0.jar
-  @run main/othervm TestKeyAgreementAlgorithms false
-  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestKeyAgreementAlgorithms true
+  @run main/othervm TestKeyAgreementAlgorithms BCFIPS false
+  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestKeyAgreementAlgorithms BCFIPS true
 */
 
 
@@ -135,8 +135,8 @@ public class TestKeyAgreementAlgorithms extends TestAlgorithms {
         super("Key Agreement");
     }
 
-    public void testFunction(String algo) throws NoSuchProviderException, NoSuchAlgorithmException {
-        KeyAgreement.getInstance(algo, "BCFIPS");
+    public void testFunction(String algo, String provider) throws NoSuchProviderException, NoSuchAlgorithmException {
+        KeyAgreement.getInstance(algo, provider);
     }
 
     public static void main(String [] args) throws Exception {

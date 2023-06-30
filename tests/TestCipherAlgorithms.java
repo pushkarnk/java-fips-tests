@@ -8,8 +8,8 @@ import javax.crypto.NoSuchPaddingException;
   @test
   @library /jars/bc-fips-1.0.2.3.jar
   @library /jtreg/lib/testng-7.3.0.jar
-  @run main/othervm TestCipherAlgorithms false
-  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestCipherAlgorithms true
+  @run main/othervm TestCipherAlgorithms BCFIPS false
+  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestCipherAlgorithms BCFIPS true
 */
 
 public class TestCipherAlgorithms extends TestAlgorithms {
@@ -78,9 +78,9 @@ public class TestCipherAlgorithms extends TestAlgorithms {
         new TestCipherAlgorithms().runTest(args);
     }
 
-    void testFunction(String algo) throws NoSuchAlgorithmException, NoSuchProviderException {
+    void testFunction(String algo, String provider) throws NoSuchAlgorithmException, NoSuchProviderException {
         try {
-            Cipher.getInstance(algo, "BCFIPS");
+            Cipher.getInstance(algo, provider);
         } catch (NoSuchPaddingException nspe) {
             NoSuchAlgorithmException nsae = new NoSuchAlgorithmException(nspe);
             throw nsae; 

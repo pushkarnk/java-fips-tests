@@ -4,7 +4,7 @@ import java.security.*;
   @test
   @library /jars/bc-fips-1.0.2.3.jar
   @library /jtreg/lib/testng-7.3.0.jar
-  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestDRBGAlgorithms
+  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestDRBGAlgorithms BCFIPS true
 */
 public class TestDRBGAlgorithms extends TestAlgorithms {
 
@@ -23,8 +23,8 @@ public class TestDRBGAlgorithms extends TestAlgorithms {
         return new String[] { };
     }
 
-    void testFunction(String algo) throws NoSuchAlgorithmException, NoSuchProviderException {
-        SecureRandom.getInstance(algo, "BCFIPS");
+    void testFunction(String algo, String provider) throws NoSuchAlgorithmException, NoSuchProviderException {
+        SecureRandom.getInstance(algo, provider);
     }
 
 

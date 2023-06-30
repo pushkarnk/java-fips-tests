@@ -1,14 +1,12 @@
 import java.security.*;
 import javax.crypto.*;
-import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
-import static org.testng.Assert.assertEquals;
 
 /*
   @test
   @library /jars/bc-fips-1.0.2.3.jar
   @library /jtreg/lib/testng-7.3.0.jar
-  @run main/othervm -Dorg.bouncycastle.jca.enable_jks=true TestPBKeyDerivationFunctions false
-  @run main/othervm -Dorg.bouncycastle.jca.enable_jks=true -Dorg.bouncycastle.fips.approved_only=true TestPBKeyDerivationFunctions true
+  @run main/othervm TestPBKeyDerivationFunctions BCFIPS false
+  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestPBKeyDerivationFunctions BCFIPS true
 */
 
 public class TestPBKeyDerivationFunctions extends TestAlgorithms {
@@ -58,7 +56,7 @@ public class TestPBKeyDerivationFunctions extends TestAlgorithms {
         new TestPBKeyDerivationFunctions().runTest(args);
     }
 
-    void testFunction(String algo) throws NoSuchProviderException, NoSuchAlgorithmException {
-        SecretKeyFactory.getInstance(algo, "BCFIPS");
+    void testFunction(String algo, String provider) throws NoSuchProviderException, NoSuchAlgorithmException {
+        SecretKeyFactory.getInstance(algo, provider);
     }
 }
