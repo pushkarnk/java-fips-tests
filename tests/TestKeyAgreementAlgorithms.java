@@ -1,9 +1,6 @@
-import java.security.*;
 import javax.crypto.KeyAgreement;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import static org.testng.Assert.assertEquals;
-import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 
 /*
   @test
@@ -14,8 +11,9 @@ import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 */
 
 
-public class TestKeyAgreementAlgorithms {
-    private static String [] approvedAlgos = {
+public class TestKeyAgreementAlgorithms extends TestAlgorithms {
+    String [] getApprovedAlgorithms() {
+        return new String[] {
             "DH",
             "DHwithSHA1KDF",
             "DHwithSHA224KDF",
@@ -123,49 +121,27 @@ public class TestKeyAgreementAlgorithms {
             "ECMQVwithSHA512CKDF",
             "ECMQVwithSHA512(224)CKDF",
             "ECMQVwithSHA512(256)CKDF"
-    };
+        };
+    }
 
-    private static String [] generalAlgorithms = {
+    String [] getGeneralAlgorithms() {
+        return new String[] {
             "X448",
             "X25519"
-    };
+        };
+    }
+
+    public TestKeyAgreementAlgorithms() {
+        super("Key Agreement");
+    }
+
+    public void testFunction(String algo) throws NoSuchProviderException, NoSuchAlgorithmException {
+        KeyAgreement.getInstance(algo, "BCFIPS");
+    }
 
     public static void main(String [] args) throws Exception {
-        Security.addProvider(new BouncyCastleFipsProvider());
-        boolean approvedOnly = args.length == 1 && Boolean.parseBoolean(args[0]);
-        if (approvedOnly) {
-            assertAlgosPass(approvedAlgos);
-            assertAlgosFail(generalAlgorithms);
-        } else {
-            assertAlgosPass(approvedAlgos);
-            assertAlgosPass(generalAlgorithms);
-        }
+        new TestKeyAgreementAlgorithms().runTest(args);
     }
-
-    private static void assertAlgosPass(String [] algos) throws NoSuchProviderException {
-        int failureCount = 0;
-        for (String algo : algos) {
-            try {
-                KeyAgreement agree = KeyAgreement.getInstance(algo, "BCFIPS");
-            } catch (NoSuchAlgorithmException nae) {
-                failureCount++;
-            }
-        }
-        assertEquals(failureCount, 0, "Some algorithms were expected to pass, but failed: ");
-    }
-
-    private static void assertAlgosFail(String [] algos) throws NoSuchProviderException {
-        int failureCount = 0;
-        for (String algo : algos) {
-            try {
-                KeyAgreement agree = KeyAgreement.getInstance(algo, "BCFIPS");
-            } catch (NoSuchAlgorithmException nae) {
-                failureCount ++;
-            }
-        }
-        assertEquals(failureCount, algos.length, "Some algorithms were expected to fail, but passed: ");
-    }
-
 
 }
 

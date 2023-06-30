@@ -11,27 +11,27 @@ import static org.testng.Assert.assertEquals;
   @run main/othervm TestKeyTransportAlgorithms false
   @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestKeyTransportAlgorithms true
 */
-public class TestKeyTransportAlgorithms {
-    private static String [] keyTransportAlgos = {
+public class TestKeyTransportAlgorithms extends TestAlgorithms {
+    public TestKeyTransportAlgorithms() {
+        super("Key Transport");
+    }
+ 
+    String [] getApprovedAlgorithms() {
+        return new String[] {
             "RSA-KTS-KEM-KWS",
             "RSA-KTS-OAEP"
-    };
-
-    public static void main(String [] args) throws Exception {
-        Security.addProvider(new BouncyCastleFipsProvider());
-        assertKeyTransportPass(keyTransportAlgos);
+        };
     }
 
-    private static void assertKeyTransportPass(String [] keyTransportAlgos) throws NoSuchProviderException, NoSuchPaddingException {
-        int failureCount = 0;
-        for (String algo : keyTransportAlgos) {
-            try {
-                SecretKeyFactory c = SecretKeyFactory.getInstance(algo, "BCFIPS");
-            } catch (NoSuchAlgorithmException ks) {
-                System.out.println("failed: " + algo);
-                failureCount++;
-            }
-        }
-        assertEquals(failureCount, 0, "One or more key transport algorithms unexpectedly failed: ");
+    String [] getGeneralAlgorithms() {
+        return new String[] { };
+    }
+
+    public static void main(String [] args) throws Exception {
+        new TestKeyTransportAlgorithms().runTest(args);
+    }
+
+    public void testFunction(String algo) throws NoSuchAlgorithmException, NoSuchProviderException { 
+        SecretKeyFactory c = SecretKeyFactory.getInstance(algo, "BCFIPS");
     }
 }

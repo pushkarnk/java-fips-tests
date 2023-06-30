@@ -1,8 +1,4 @@
-import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
-
 import java.security.*;
-
-import static org.testng.Assert.assertEquals;
 
 /*
   @test
@@ -10,31 +6,30 @@ import static org.testng.Assert.assertEquals;
   @library /jtreg/lib/testng-7.3.0.jar
   @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestDRBGAlgorithms
 */
-public class TestDRBGAlgorithms {
+public class TestDRBGAlgorithms extends TestAlgorithms {
 
-    private static String [] approvedDRBGs = {
+    public TestDRBGAlgorithms() {
+        super("Deterministic Random Bit Generator");
+    }
+
+    String [] getApprovedAlgorithms() {
+        return new String[] {
             "DEFAULT",
             "NONCEANDIV"
-    };
+        };
+    }
 
+    String [] getGeneralAlgorithms() {
+        return new String[] { };
+    }
 
-    private static void assertAllowed(String [] algos) throws NoSuchProviderException {
-        int failureCount = 0;
-
-        for (String algo : algos) {
-            try {
-                SecureRandom s = SecureRandom.getInstance(algo, "BCFIPS");
-            } catch (NoSuchAlgorithmException nsae) {
-                failureCount++;
-            }
-        }
-        assertEquals(failureCount, 0, "Some allowed algorithm/s was/were not permitted: ");
+    void testFunction(String algo) throws NoSuchAlgorithmException, NoSuchProviderException {
+        SecureRandom.getInstance(algo, "BCFIPS");
     }
 
 
     public static void main(String [] args) throws Exception {
-        Security.addProvider(new BouncyCastleFipsProvider());
-        assertAllowed(approvedDRBGs);
+        new TestDRBGAlgorithms().runTest(args);
     }
 }
 

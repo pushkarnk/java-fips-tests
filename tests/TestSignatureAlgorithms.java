@@ -14,9 +14,14 @@ import static org.testng.Assert.assertEquals;
   @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestSignatureAlgorithms true
 */
 
-public class TestSignatureAlgorithms {
+public class TestSignatureAlgorithms extends TestAlgorithms {
 
-    private static String [] approvedAlgorithms = {
+    public TestSignatureAlgorithms() {
+        super("Signature");
+    }
+
+    String [] getApprovedAlgorithms() {
+        return new String[] {
             "SHA1withDSA",
             "SHA224withDSA",
             "SHA256withDSA",
@@ -79,9 +84,11 @@ public class TestSignatureAlgorithms {
             "SHA512withRSA/X9.31",
             "SHA512(224)withRSA/X9.31",
             "SHA512(256)withRSA/X9.31"
-    };
+        };
+    }
 
-    private static String [] generalAlgorithms = {
+    String [] getGeneralAlgorithms() {
+        return new String[] {
             "SHA1withDDSA",
             "SHA224withDDSA",
             "SHA224withDDSA",
@@ -136,43 +143,14 @@ public class TestSignatureAlgorithms {
             "RIPEMD128withRSA/X9.31",
             "RIPEMD160withRSA/X9.31",
             "WhirlpoolwithRSA/X9.31"
-    };
-
-    private static void assertAllowed(String [] algos) throws NoSuchProviderException {
-        int failureCount = 0;
-
-        for (String algo : algos) {
-            try {
-                Signature sign = Signature.getInstance(algo, "BCFIPS");
-            } catch (NoSuchAlgorithmException nsae) {
-                failureCount++;
-            }
-        }
-        assertEquals(failureCount, 0, "Some allowed algorithm/s was/were not permitted: ");
+        };
     }
 
-    private static void assertNotAllowed(String [] algos) throws NoSuchProviderException {
-        int failureCount = 0;
-
-        for (String algo : algos) {
-            try {
-                Signature sign = Signature.getInstance(algo, "BCFIPS");
-            } catch (NoSuchAlgorithmException nsae) {
-                failureCount++;
-            }
-        }
-        assertEquals(failureCount, algos.length, "Some allowed algorithm/s was/were not permitted: ");
+    void testFunction(String algo) throws NoSuchProviderException, NoSuchAlgorithmException {
+        Signature.getInstance(algo, "BCFIPS");
     }
 
     public static void main(String [] args) throws Exception {
-        Security.addProvider(new BouncyCastleFipsProvider());
-        boolean approvedOnly = args.length == 1 && Boolean.parseBoolean(args[0]);
-        if (approvedOnly) {
-            assertAllowed(approvedAlgorithms);
-            assertNotAllowed(generalAlgorithms);
-        } else {
-            assertAllowed(approvedAlgorithms);
-            assertAllowed(generalAlgorithms);
-        }
+        new TestSignatureAlgorithms().runTest(args); 
     }
 }

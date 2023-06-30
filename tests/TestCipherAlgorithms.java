@@ -1,23 +1,18 @@
 import java.security.*;
-import java.util.HashSet;
-
-import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
-
+import java.util.ArrayList;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertThrows;
 
 /*
   @test
   @library /jars/bc-fips-1.0.2.3.jar
   @library /jtreg/lib/testng-7.3.0.jar
-  @run main/othervm TestCiphers false
-  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestCiphers true
+  @run main/othervm TestCipherAlgorithms false
+  @run main/othervm -Dorg.bouncycastle.fips.approved_only=true TestCipherAlgorithms true
 */
 
-public class TestCiphers {
+public class TestCipherAlgorithms extends TestAlgorithms {
 
     private static String [] approvedCiphers = {
             "AES/ECB", "AES/CBC", "AES/CFB8", "AES/CFB128",
@@ -74,85 +69,71 @@ public class TestCiphers {
                                             "X9.23Padding", "TBCPadding", "CS1Padding", "CS2Padding", "CS3Padding" };
 
     
+
+    public TestCipherAlgorithms() {
+        super("Cipher(Symmetric/Public Key)");
+    }
     
     public static void main(String [] args) throws Exception {
-        boolean approvedOnly = args.length == 1 && Boolean.parseBoolean(args[0]);
-        Security.addProvider(new BouncyCastleFipsProvider());
-        testApproved();
-        testNonApproved(approvedOnly);
-        testPublicKeyNonApproved(approvedOnly);
+        new TestCipherAlgorithms().runTest(args);
     }
 
-    public static void testApproved() throws NoSuchProviderException, NoSuchPaddingException, NoSuchAlgorithmException {
-        Cipher c;
+    void testFunction(String algo) throws NoSuchAlgorithmException, NoSuchProviderException {
+        try {
+            Cipher.getInstance(algo, "BCFIPS");
+        } catch (NoSuchPaddingException nspe) {
+            NoSuchAlgorithmException nsae = new NoSuchAlgorithmException(nspe);
+            throw nsae; 
+        }
+    }
+
+    String[] getApprovedAlgorithms() {
+        ArrayList<String> list = new ArrayList<>();
         for (String cipher : approvedCiphers) {
-            Cipher.getInstance(cipher + "/NoPadding", "BCFIPS");
+            list.add(cipher + "/NoPadding");
             if (cipher.endsWith("ECB")) {
                 for (String padding : paddingsECB) {
-                    Cipher.getInstance(cipher + "/" + padding, "BCFIPS");
+                    list.add(cipher + "/" + padding);
                 }
             } else if (cipher.endsWith("CBC")) {
                 for (String padding : paddingsCBC) {
-                    Cipher.getInstance(cipher + "/" + padding, "BCFIPS");
+                    list.add(cipher + "/" + padding);
                 }
             }
         }
+        return list.toArray(new String[list.size()]);
     }
 
-    public static void testNonApproved(boolean approvedOnly) throws NoSuchProviderException, NoSuchPaddingException {
-        HashSet<String> algos = new HashSet<>();
-        Cipher c;
-        int failureCount = 0;
+    String[] getGeneralAlgorithms() {
+        ArrayList<String> list = new ArrayList<>();
         for (String cipher : nonApprovedCiphers) {
-            try {
-                Cipher.getInstance(cipher + "/NoPadding", "BCFIPS");
-                if (cipher.endsWith("ECB")) {
-                    for (String padding : paddingsECB) {
-                        Cipher.getInstance(cipher + "/" + padding, "BCFIPS");
-                    }
-                } else if (cipher.endsWith("CBC")) {
-                    for (String padding : paddingsCBC) {
-                        Cipher.getInstance(cipher + "/" + padding, "BCFIPS");
-                    }
+            list.add(cipher + "/NoPadding");
+            if (cipher.endsWith("ECB")) {
+                for (String padding : paddingsECB) {
+                    list.add(cipher + "/" + padding);
                 }
-            } catch (NoSuchAlgorithmException e) {
-                algos.add(cipher);
-                failureCount++;
+            } else if (cipher.endsWith("CBC")) {
+                for (String padding : paddingsCBC) {
+                    list.add(cipher + "/" + padding);
+                }
             }
         }
 
-        if (approvedOnly) {
-            assertEquals(failureCount, nonApprovedCiphers.length, "Usage of a non-approved algorithm was permitted");
-        } else {
-            assertEquals(failureCount, 0, "Unexpected NoSuchAlgorithmException " + algos);
-        }
-    }
-
-    public static void testPublicKeyNonApproved(boolean approvedOnly) throws NoSuchProviderException, NoSuchPaddingException {
+        // public key
         String [] paddings = { "OAEPwithSHA-1andMGF1Padding", "OAEPwithSHA-1andMGF1Padding", "OAEPwithSHA-1andMGF1Padding",
                                "OAEPwithSHA-1andMGF1Padding", "OAEPwithSHA-1andMGF1Padding", "PKCS1Padding" };
 
-        int failureCount = 0;
 
         // TODO: RSA/ECB, RSA/NONE should fail in approved_only mode, but they don't
         String [] generalAlgos = { "ElGamal/ECB", "ElGamal/NONE"/*, "RSA/ECB", "RSA/NONE" */ };
         for (String cipher : generalAlgos) {
-            try {
-                Cipher.getInstance(cipher + "/NoPadding", "BCFIPS");
-                if (cipher.endsWith("ECB")) {
-                    for (String padding : paddings) {
-                        Cipher.getInstance(cipher + "/" + padding, "BCFIPS");
-                    }
+            list.add(cipher + "/NoPadding");
+            if (cipher.endsWith("ECB")) {
+                for (String padding : paddings) {
+                    list.add(cipher + "/" + padding);
                 }
-            } catch (NoSuchAlgorithmException nae) {
-                failureCount++;
             }
         }
-
-        if (approvedOnly) {
-            assertEquals(failureCount, generalAlgos.length, "Usage of a non-approved algorithm was permitted");
-        } else {
-            assertEquals(failureCount, 0, "Unexpected NoSuchAlgorithmException ");
-        }
+        return list.toArray(new String[list.size()]);
     }
 }
